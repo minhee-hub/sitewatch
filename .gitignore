@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+models/
+*.pt
+runs/
+*.mp4
+*.avi
+*.mkv
+.streamlit/secrets.toml

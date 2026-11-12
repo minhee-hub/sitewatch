@@ -1,0 +1,99 @@
+# 현장 보조 판단용 기본값. 법정 인증 거리가 아니다.
+# 산업안전보건기준에 관한 규칙은 차량계 건설기계 접촉 장소와
+# 굴착기 선회 위험 장소의 출입을 금지하지만, 고정 미터 값은 두지 않는다.
+
+model:
+  gpu: yoloe-26s-seg.pt
+  cpu: yoloe-11s-seg.pt
+  confidence: 0.25
+  iou: 0.45
+  imgsz: 640
+
+classes:
+  - person
+  - excavator
+  - dump truck
+  - wheel loader
+  - bulldozer
+  - crane
+  - road roller
+  - concrete mixer
+  - forklift
+
+labels:
+  person: 사람
+  excavator: 굴착기
+  dump truck: 덤프트럭
+  wheel loader: 휠로더
+  bulldozer: 불도저
+  crane: 크레인
+  road roller: 롤러
+  concrete mixer: 콘크리트 믹서
+  forklift: 지게차
+
+level_labels:
+  safe: 안전
+  caution: 주의
+  warning: 경고
+  critical: 위험
+
+# kind: worker | swing | mobile
+# swing 위험반경은 기체 중심 기준. 팔 길이가 박스 밖에 있으므로 윤곽+2m를 쓰지 않는다.
+# mobile 위험반경은 지면 윤곽 반지름 + static_buffer_m.
+profiles:
+  person:
+    kind: worker
+  excavator:
+    kind: swing
+    swing_radius_m: 5.0
+    awareness_radius_m: 8.0
+  crane:
+    kind: swing
+    swing_radius_m: 9.0
+    awareness_radius_m: 12.0
+  dump truck:
+    kind: mobile
+    awareness_radius_m: 6.0
+  wheel loader:
+    kind: mobile
+    awareness_radius_m: 6.0
+  bulldozer:
+    kind: mobile
+    awareness_radius_m: 6.0
+  road roller:
+    kind: mobile
+    awareness_radius_m: 5.0
+  concrete mixer:
+    kind: mobile
+    awareness_radius_m: 6.0
+  forklift:
+    kind: mobile
+    awareness_radius_m: 5.0
+
+risk:
+  # 팔·몸통이 장비 윤곽 밖으로 나가는 길이. 근접경보 문헌의 초기 안전경계.
+  static_buffer_m: 1.5
+  # 운전자 반응 2.5초. 정지거리 = v*반응 + v^2/(2a)
+  reaction_time_s: 2.5
+  # 승용차 약 3.4m/s^2보다 보수적인 중장비 감속.
+  braking_decel_m_s2: 2.0
+  critical_ttc_s: 1.5
+  warning_ttc_s: 3.0
+  prediction_horizon_s: 3.0
+  prediction_step_s: 0.5
+  min_closing_speed_m_s: 0.3
+  # 검출 흔들림이 비현실적 속력이 되지 않도록 막는 상한. 약 54km/h.
+  max_speed_m_s: 15.0
+  uncalibrated_notice: "보정 필요: 미터 위험도를 계산하지 않습니다."
+
+tracking:
+  process_noise: 0.8
+  measurement_noise: 0.25
+  max_age_s: 1.5
+  trail_length: 40
+
+heatmap:
+  sigma_m: 0.8
+  trail_seconds: 2.5
+  overlap_sigma_px: 22
+  overlay: true
